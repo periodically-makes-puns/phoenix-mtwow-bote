@@ -1,0 +1,24 @@
+{
+  "name": "phoenix-mtwow-bote",
+  "version": "0.0.1",
+  "description": "A Discord bot and website for miniTWOWs",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/periodically-makes-puns/phoenix-mtwow-bote.git"
+  },
+  "author": "PMPuns",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/periodically-makes-puns/phoenix-mtwow-bote/issues"
+  },
+  "homepage": "https://github.com/periodically-makes-puns/phoenix-mtwow-bote#readme",
+  "dependencies": {
+    "discord.js": "^11.5.1",
+    "express": "^4.17.1"
+  }
+}

@@ -1,42 +1,55 @@
+const git = require('simple-git')();
+
 module.exports.initialize = () => {
-    // Initialises all the tables
-    db.serialize(function() {
-        db.run(`CREATE TABLE IF NOT EXISTS Members (
+    db.transaction(() => {
+        // Initialises all the tables
+        db.prepare(`CREATE TABLE IF NOT EXISTS Members (
                 id INT PRIMARY KEY NOT NULL,
-                admin BOOLEAN DEFAULT 0,
                 aggregateVoteCount INT DEFAULT 0,
                 roundVoteCount INT DEFAULT 0
             );
-        `);
-        db.run(`CREATE TABLE IF NOT EXISTS Contestants (
+        `).run();
+        db.prepare(`CREATE TABLE IF NOT EXISTS Contestants (
                 id INT PRIMARY KEY NOT NULL,
                 alive BOOLEAN DEFAULT 0,
                 allowedResponseCount INT DEFAULT 1,
                 responseCount INT DEFAULT 0
             );
-        `);
-        db.run(`CREATE TABLE IF NOT EXISTS Votes (
+        `).run();
+        db.prepare(`CREATE TABLE IF NOT EXISTS Votes (
                 uid INT PRIMARY KEY NOT NULL,
                 vid INT,
-                gseed STRING,
-                vote STRING
+                gseed TEXT,
+                vote TEXT
             );
-        `);
-        db.run(`CREATE TABLE IF NOT EXISTS Responses (
+        `).run();
+        db.prepare(`CREATE TABLE IF NOT EXISTS Responses (
                 uid INT PRIMARY KEY NOT NULL,
                 rid INT,
-                response STRING
+                response TEXT
             );
-        `);
-    });
+        `).run();
+    })();
 }
 
+module.exports.wipe = () => {
+    db.transaction(() => {
+        // Wipes all data
+        db.prepare(`DROP TABLE IF EXISTS Members;`).run(); 
+        db.prepare(`DROP TABLE IF EXISTS Contestants;`).run(); 
+        db.prepare(`DROP TABLE IF EXISTS Votes;`).run(); 
+        db.prepare(`DROP TABLE IF EXISTS Responses;`).run(); 
+    })();
+}
 module.exports.fullReset = () => {
-    // Wipes all data
-    db.serialize(function() {
-        db.run(`DROP TABLE IF EXISTS Members;`); 
-        db.run(`DROP TABLE IF EXISTS Contestants;`); 
-        db.run(`DROP TABLE IF EXISTS Votes;`); 
-        db.run(`DROP TABLE IF EXISTS Responses;`); 
-    });
+    this.wipe();
+    this.initialize();
+}
+
+module.exports.pull = () => {
+    git.pull("origin", "master");
+}
+
+module.exports.addMember = (uid) => {
+    db.transaction(() => {db.prepare("INSERT OR IGNORE INTO Members (id) VALUES (?);").run(uid)})();
 }

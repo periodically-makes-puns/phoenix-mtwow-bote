@@ -3,6 +3,7 @@ module.exports.initialize = () => {
     db.serialize(function() {
         db.run(`CREATE TABLE IF NOT EXISTS Members (
                 id INT PRIMARY KEY NOT NULL,
+                admin BOOLEAN DEFAULT 0,
                 aggregateVoteCount INT DEFAULT 0,
                 roundVoteCount INT DEFAULT 0
             );

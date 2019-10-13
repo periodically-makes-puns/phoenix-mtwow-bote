@@ -3,7 +3,7 @@ const discord = require("discord.js");
 const express = require("express");
 const fs = require("fs");
 const debug = require("debug");
-const sqlAdmin = require("./sqlAdmin.js");
+const sqlAdmin = require("./admin.js");
 
 // Initialise loggers
 // Using global because... I know it's bad design but I'm the only asshat coding this thing

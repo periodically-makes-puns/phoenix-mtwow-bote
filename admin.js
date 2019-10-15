@@ -1,77 +1,80 @@
 const git = require('simple-git')();
 
-module.exports.initialize = (state) => {
-    state.db.transaction(() => {
+module.exports.initialize = (db) => {
+    db.transaction(() => {
         // Initialises all the tables
-        state.db.prepare(`CREATE TABLE IF NOT EXISTS Members (
-                id INT PRIMARY KEY NOT NULL,
-                aggregateVoteCount INT DEFAULT 0,
-                roundVoteCount INT DEFAULT 0
+        db.prepare(`CREATE TABLE IF NOT EXISTS Members (
+                uid INTEGER PRIMARY KEY NOT NULL,
+                aggregateVoteCount INTEGER DEFAULT 0,
+                roundVoteCount INTEGER DEFAULT 0
             );
         `).run();
-        state.db.prepare(`CREATE TABLE IF NOT EXISTS Contestants (
-                id INT PRIMARY KEY NOT NULL,
+        db.prepare(`CREATE TABLE IF NOT EXISTS Contestants (
+                uid INTEGER PRIMARY KEY NOT NULL,
                 alive BOOLEAN DEFAULT 0,
-                allowedResponseCount INT DEFAULT 1,
-                responseCount INT DEFAULT 0
+                allowedResponseCount INTEGER DEFAULT 1,
+                responseCount INTEGER DEFAULT 0
             );
         `).run();
-        state.db.prepare(`CREATE TABLE IF NOT EXISTS Votes (
-                id INT PRIMARY KEY NOT NULL,
-                uid INT NOT NULL,
-                vid INT NOT NULL,
+        db.prepare(`CREATE TABLE IF NOT EXISTS Votes (
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                uid INTEGER NOT NULL,
+                vid INTEGER NOT NULL,
                 gseed TEXT UNIQUE NOT NULL,
                 vote TEXT
             );
         `).run();
-        state.db.prepare(`CREATE TABLE IF NOT EXISTS Responses (
-                id INT PRIMARY KEY NOT NULL,
-                uid INT NOT NULL,
-                rid INT NOT NULL,
+        db.prepare(`CREATE TABLE IF NOT EXISTS Responses (
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                uid INTEGER NOT NULL,
+                rid INTEGER NOT NULL,
                 response TEXT
             );
         `).run();
-        state.db.prepare(`CREATE TABLE IF NOT EXISTS Status (
-                roundNum INT,
+        db.prepare(`CREATE TABLE IF NOT EXISTS Status (
+                roundNum INTEGER,
                 prompt TEXT,
                 phase TEXT,
-                deadline INT
+                deadline INTEGER
             );
         `).run();
-        state.db.prepare(`CREATE TABLE IF NOT EXISTS ResponseArchive (
-                roundNum INT NOT NULL,
-                id INT NOT NULL
-                uid INT NOT NULL,
-                rid INT NOT NULL,
-                rank INT NOT NULL,
+        db.prepare(`CREATE TABLE IF NOT EXISTS ResponseArchive (
+                roundNum INTEGER NOT NULL,
+                id INTEGER NOT NULL,
+                uid INTEGER NOT NULL,
+                rid INTEGER NOT NULL,
+                rank INTEGER NOT NULL,
                 response TEXT NOT NULL,
                 score DOUBLE NOT NULL,
                 skew DOUBLE NOT NULL
             );
         `).run();
+        if (!db.prepare("SELECT * FROM Status;").get()) {
+            db.prepare("INSERT INTO Status VALUES (1, '', signups, -1);");
+        }
     })();
 }
 
-module.exports.wipe = (state) => {
-    state.db.transaction(() => {
+module.exports.wipe = (db) => {
+    db.transaction(() => {
         // Wipes all data
-        state.db.prepare(`DROP TABLE IF EXISTS Members;`).run(); 
-        state.db.prepare(`DROP TABLE IF EXISTS Contestants;`).run(); 
-        state.db.prepare(`DROP TABLE IF EXISTS Votes;`).run(); 
-        state.db.prepare(`DROP TABLE IF EXISTS Responses;`).run(); 
-        state.db.prepare(`DROP TABLE IF EXISTS Status;`).run();
-        state.db.prepare(`DROP TABLE IF EXISTS ResponseArchive;`).run();
+        db.prepare(`DROP TABLE IF EXISTS Members;`).run(); 
+        db.prepare(`DROP TABLE IF EXISTS Contestants;`).run(); 
+        db.prepare(`DROP TABLE IF EXISTS Votes;`).run(); 
+        db.prepare(`DROP TABLE IF EXISTS Responses;`).run(); 
+        db.prepare(`DROP TABLE IF EXISTS Status;`).run();
+        db.prepare(`DROP TABLE IF EXISTS ResponseArchive;`).run();
     })();
 }
-module.exports.fullReset = (state) => {
-    this.wipe(state);
-    this.initialize(state);
+module.exports.fullReset = (db) => {
+    this.wipe(db);
+    this.initialize(db);
 }
 
-module.exports.pull = (state) => {
+module.exports.pull = () => {
     git.pull("gitlab-origin", "master");
 }
 
-module.exports.addMember = (state, uid) => {
-    state.db.transaction(() => {state.db.prepare("INSERT OR IGNORE INTO Members (id) VALUES (?);").run(uid)})();
+module.exports.addMember = (db, uid) => {
+    db.transaction(() => {db.prepare("INSERT OR IGNORE INTO Members (uid) VALUES (?);").run(uid)})();
 }

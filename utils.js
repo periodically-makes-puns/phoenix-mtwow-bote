@@ -20,6 +20,9 @@ module.exports.adminCommandParser = (content) => {
     return this.normalCommandParser(content); // shortcut to not repeat myself
 }
 
-module.exports.isAdmin = (uid) => client.guilds.get(instanceData.primaryServer).members.get(uid).hasPermission("ADMINISTRATOR"); 
+module.exports.isAdmin = (state, uid) => state.client.guilds.get(instanceData.primaryServer).members.get(uid).hasPermission("ADMINISTRATOR"); 
 // wow that's ugly
 // but it checks if a uid has admin privileges
+
+module.exports.inDMs = (msg) => msg.channel.type == "dm";
+// checks if a message is in DMs

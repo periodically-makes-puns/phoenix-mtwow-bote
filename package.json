@@ -21,7 +21,6 @@
     "better-sqlite3": "^5.4.3",
     "debug": "^4.1.1",
     "discord.js": "^11.5.1",
-    "ejs": "^2.7.1",
     "express": "^4.17.1",
     "pug": "^2.0.4",
     "random-js": "^2.1.0",

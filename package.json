@@ -23,6 +23,7 @@
     "discord.js": "^11.5.1",
     "ejs": "^2.7.1",
     "express": "^4.17.1",
+    "pug": "^2.0.4",
     "random-js": "^2.1.0",
     "simple-git": "^1.126.0",
     "supports-color": "^7.1.0"

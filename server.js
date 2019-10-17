@@ -85,9 +85,11 @@ app.use(express.static("public"));
 
 app.use("/docs", express.static("docs"));
 
-app.get('/', (req, res, next) => {
-    res.send("Hello world!");
-});
+app.set('view engine', 'pug');
+
+app.get("/", (req, res, next) => {
+    res.render("index", {});
+})
 
 // Info message when ready
 // Listen on port specified in config

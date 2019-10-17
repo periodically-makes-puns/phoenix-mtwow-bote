@@ -83,6 +83,8 @@ client.login(instanceData.token);
 /* EXPRESS SECTION */
 app.use(express.static('public'));
 
+app.use("/docs", express.static('docs'));
+
 app.get('/', (req, res, next) => {
     res.send("Hello world!");
 });

@@ -81,7 +81,6 @@ client.on("ready", () => {
 client.login(instanceData.token);
 
 /* EXPRESS SECTION */
-app.use(express.static('public'));
 
 app.use("/docs", express.static('docs'));
 

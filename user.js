@@ -124,6 +124,15 @@ module.exports.getAllResponsesButOwn = (db, uid) => {
 }
 
 /**
+ * Gets all responses.
+ * @param {Database} db Database to search.
+ * @return {Array} Array of all responses.
+ */
+module.exports.getAllResponses = (db) => {
+    return db.prepare("SELECT * FROM Responses;").all();
+}
+
+/**
  * Finds the word count in a response.
  * @param {String} string Response to query.
  * @returns {Number} Number of words in string.
@@ -139,7 +148,7 @@ module.exports.wordCount = (string) => {
  * @param {String} string Unfiltered string.
  * @returns {String} Filtered string.
  */
-module.exports.removeDisallowedChars  = (string) => {
+module.exports.removeDisallowedChars = (string) => {
     let res = "";
     for (let i = 0; i < string.length; i++) {
         // filter out:
@@ -152,6 +161,24 @@ module.exports.removeDisallowedChars  = (string) => {
             res += string.charAt(i);
         }
     }
+}
+
+/**
+ * Calculate expected number of votes.
+ * @param resp Response to count.
+ * @returns {Number} Expected vote count.
+ */
+module.exports.expectedVoteCount = (resp) => {
+    return resp.confirmedVoteCount + resp.pendingVoteCount * voteConfig.pendingWeight;
+}
+
+/**
+ * A compare function for sorting.
+ * @param a First response.
+ * @param b Second response.
+ */
+function lessExpectedVotes(a, b) {
+    return this.expectedVoteCount(a) - this.expectedVoteCount(b);
 }
 
 /**
@@ -242,28 +269,42 @@ module.exports.getScreen = (db, uid, voteNumber, screenSize) => {
             screen.push(resp);
             allowedResponses = getAllResponsesButOwn(db, uid);
         } else {
-
+            allowedResponses = getAllResponses(db);
         }
     }
     switch (voteConfig.voteBalacingScheme) {
         case "equal":
             // All responses are treated equally.
             // Implemented by weighting all responses with weight 1
-            
+            for (const resp of allowedResponses) {
+                weights.push(1);
+            }
             break;
         case "pareto":
             // Responses are weighted by 1 / (voteCount + 1)
-            
+            for (const resp of allowedResponses) {
+                weights.push(expectedVoteCount(resp));
+            }
             break;
         case "linear":
             // Responses are weighted by maxVoteCount - thisVoteCount + 1
-
+            let maxWeight = 0;
+            for (const resp of allowedResponses) {
+                maxWeight = Math.max(expectedVoteCount(resp), maxWeight);
+            }
+            for (const resp of allowedResponses) {
+                weights.push(maxWeight - expectedVoteCount(resp) + 1);   
+            }
             break;
         case "strict":
             // Responses with less votes ALWAYS go first.
             // Implemented by limiting response sample to lowest N responses as requested
             // then allowing randomizer to select all N in whatever order.
-
+            allowedResponses.sort(lessExpectedVotes);
+            numResps = screenSize - voteConfig.giveContestantsOwnResponses;
+            allowedResponses = allowedResponses.slice(0, numResps);
+            weights = new Array(numResps);
+            weights.fill(1);
             break;
     }
 }
